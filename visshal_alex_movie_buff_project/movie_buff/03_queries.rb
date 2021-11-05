@@ -22,7 +22,10 @@ end
 
 def actor_out_of_work
   # Find the number of actors in the database who have not appeared in a movie
-  
+  Actor.select(:name)
+  .joins('LEFT OUTER JOIN castings ON castings.actor_id = actors.id')
+  .where(castings: {movie_id: nil}) # SQL doesn't accept nil (figure out why this works)
+  .count
 end
 
 def starring(whazzername)
@@ -32,7 +35,10 @@ def starring(whazzername)
 
   # ex. "Sylvester Stallone" is like "sylvester" and "lester stone" but
   # not like "stallone sylvester" or "zylvester ztallone"
-
+  name = "%#{whazzername.split("").join("%")}%"
+  
+  Movie.joins(:actors)
+  .where("UPPER(actors.name) LIKE UPPER(?) ", name)
 end
 
 def longest_career
@@ -40,5 +46,11 @@ def longest_career
   # (the greatest time between first and last movie).
   # Order by actor names. Show each actor's id, name, and the length of
   # their career.
+
+  Actor.select(:id, :name, " MAX(movies.yr) - MIN(movies.yr) AS career")
+  .joins(:movies)
+  .order("career DESC")
+  .group(:id)
+  .limit(3)
 
 end
