@@ -9,6 +9,7 @@ def golden_age
   # Find the decade with the highest average movie score.
   Movie.select('AVG(score) AS average, (yr / 10) * 10 AS decade').group('decade')
   .order('AVG(score) DESC').first.decade
+  
 end
 
 def costars(name)
